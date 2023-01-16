@@ -43,6 +43,7 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
         $token_livetime = 3800;
 
         $token_key = trim($request->headers->get('authorization'));
+        $token_key = md5($token_key);
 
         if(!$token_key)
         {
@@ -83,7 +84,10 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
         $data = [
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
         ];
+        
+        $response = new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
 
-        return new JsonResponse(json_encode($data, JSON_UNESCAPED_UNICODE), Response::HTTP_UNAUTHORIZED);
+        return $response;
     }
 }

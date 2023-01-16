@@ -31,6 +31,7 @@ class LoginService
 		$old_token = null;
 
 		$token_key = '';
+		$encrypt_token_key = '';
 
 		$login = $userData->getLogin();
 		$password = $userData->getPassword();
@@ -50,13 +51,15 @@ class LoginService
 		{
 			$this->tokenRepository->remove($old_token, true);
 		}
-
+		
 		$token_key = $this->generateTokenKey();
-		$token = (new Token())->setUserRel($user)->setTokenKey($token_key)->setTokenUntill( time() + $token_livetime);
+		$encrypt_token_key = md5($token_key);
+
+		$token = (new Token())->setUserRel($user)->setTokenKey($encrypt_token_key)->setTokenUntill( time() + $token_livetime);
 
 		$this->tokenRepository->save($token, true);
 
-		return (new TokenResponse())->setTokenKey($token->getTokenKey())->setTokenUntill($token->getTokenUntill());
+		return (new TokenResponse())->setTokenKey($token_key)->setTokenUntill($token->getTokenUntill());
 
 
 

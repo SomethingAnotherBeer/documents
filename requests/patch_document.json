@@ -1,0 +1,22 @@
+{
+	"document_payload":
+	{
+		"meta":
+		{
+			"type": "cunning",
+			"color": null
+		},
+
+		"actions":
+		[
+			{
+				"action": "eat",
+				"actor": "blob"
+			},
+
+			{
+				"action": "run away"
+			}
+		]
+	}
+}
