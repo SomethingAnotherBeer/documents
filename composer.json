@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^1.9",
+        "phpunit/phpunit": "^9.5",
         "symfony/maker-bundle": "^1.48"
     },
     "config": {

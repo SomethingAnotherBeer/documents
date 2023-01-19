@@ -1,7 +1,7 @@
 <?php 
 namespace App\Service;
 
-use App\Entity\Document;
+use App\Entity\{Document, User};
 use App\Repository\{DocumentRepository, UserRepository};
 use App\Data\{DocumentData, DocumentItem, DocumentItemList, PaginationData};
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -25,7 +25,7 @@ class DocumentService
 	}
 
 
-	public function createDocument(DocumentData $documentData, UserInterface $currentUser):DocumentItem
+	public function createDocument(DocumentData $documentData, User $currentUser):DocumentItem
 	{
 		$document_key = $this->generateDocumentKey();
 		$document_payload = $documentData->getDocumentPayload();
@@ -51,7 +51,7 @@ class DocumentService
 	}
 
 
-	public function pathDocument(DocumentData $documentData, UserInterface $currentUser):DocumentItem
+	public function patchDocument(DocumentData $documentData, User $currentUser):DocumentItem
 	{
 		$updated_payload = [];
 		$old_paytload = [];
@@ -96,7 +96,7 @@ class DocumentService
 	}
 
 
-	public function publishDocument(DocumentData $documentData, UserInterface $currentUser):DocumentItem
+	public function publishDocument(DocumentData $documentData, User $currentUser):DocumentItem
 	{
 		$document_key = $documentData->getDocumentKey();
 
@@ -135,7 +135,7 @@ class DocumentService
 		$documents_count = $this->paginationService->getRowsCount();;
 		$offset = $this->paginationService->getOffset();
 
-		$documents = $this->documentRepository->getDocuments($offset, $documents_count);
+		$documents = $this->documentRepository->getPublishedDocuments($offset, $documents_count);
 
 		return new DocumentItemList(
 			array_map(function (Document $document):DocumentItem
@@ -193,10 +193,16 @@ class DocumentService
 
 			foreach ($patch as $key => $value)
 			{
+				print_r($value);
+				echo "\n";
+
 				if (!$value)
 				{
+
+
 					if (array_key_exists($key, $target))
 					{
+
 						unset($target[$key]);
 					}
 				}

@@ -46,11 +46,12 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
 
-    public function getDocuments(int $offset, int $documents_count):array
+    public function getPublishedDocuments(int $offset, int $documents_count):array
     {  
         return $this->createQueryBuilder('d')
                 ->setFirstResult($offset)
                 ->setMaxResults($documents_count)
+                ->andWhere("d.document_status = 'published' ")
                 ->getQuery()
                 ->getResult();
     }
