@@ -186,9 +186,6 @@ class DocumentService
 
 			foreach ($patch as $key => $value)
 			{
-				print_r($value);
-				echo "\n";
-
 				if (!$value)
 				{
 
