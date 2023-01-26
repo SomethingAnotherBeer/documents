@@ -15,5 +15,27 @@
 
 3) http://servername/api/documents/all
 
+# 1) Регистрация
+url: http://servername/api/registration
+
+Метод: POST
+
+Формат тела запроса:
+```
+{
+	"login": "user_login",
+	"password": "user_password"
+}
+```
+Формат ответа:
+
+```
+{
+	"login":"someuserone",
+	"password":"111222333444"
+}
+```
+
+
 
 
