@@ -33,6 +33,7 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
         - {path: ^/api/registration, roles: PUBLIC_ACCESS}
         - {path: ^/api/login, roles: PUBLIC_ACCESS}
+        - {path: ^/api/logout, roles: ROLE_USER}
         - {path: ^/api/document, roles: ROLE_USER}
 
 when@test:

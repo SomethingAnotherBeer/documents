@@ -14,7 +14,7 @@ class ExceptionListener
     {
         $exception = $event->getThrowable();
 
-        $message = ['error' => $exception->getMessage(), 'error_code' => $exception->getCode()];
+        $message = ['message' => $exception->getMessage(), 'error_code' => $exception->getCode()];
 
         $response = new JsonResponse();
         $response->setContent(json_encode($message, JSON_UNESCAPED_UNICODE));

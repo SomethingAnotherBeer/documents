@@ -54,7 +54,7 @@ class DocumentController extends AbstractController
     }   
 
     #[Route('/api/document/{document_key}/patch', methods: ['PATCH'])]
-    public function pathDocument(Request $request, string $document_key):JsonResponse
+    public function patchDocument(Request $request, string $document_key):JsonResponse
     {
         $request_params = $request->toArray();
 
@@ -67,7 +67,7 @@ class DocumentController extends AbstractController
 
         ];
 
-        $response = $this->documentService->pathDocument(new DocumentData($document_params), $this->currentUser);
+        $response = $this->documentService->patchDocument(new DocumentData($document_params), $this->currentUser);
 
 
 
@@ -89,20 +89,17 @@ class DocumentController extends AbstractController
         return $this->json($response, 200)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
     }
 
-
-
-    #[Route('/api/document/read', methods: ['GET'])]
-    public function getDocuments(Request $request):JsonResponse
+    #[Route('/api/document/{document_key}/delete', methods: ['DELETE'])]
+    public function deleteDocument(Request $request, string $document_key):JsonResponse
     {
-       $page = ($request->query->get('page')) ? $request->query->get('page') : 1;
+        $document_params = [
+            'document_key' => $document_key,
+        ];
 
+        $response = $this->documentService->deleteDocument(new DocumentData($document_params), $this->currentUser);
 
-       $response = $this->documentService->getDocuments($page);
-
-       return $this->json($response, 200)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
-
+        return $this->json($response, 201)->setEncodingOptions(JSON_UNESCAPED_UNICODE);
     }
-
 
 
 }

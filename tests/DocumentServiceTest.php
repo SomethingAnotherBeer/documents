@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 use App\Entity\{User, Document};
 use App\Repository\{UserRepository, DocumentRepository};
-use App\Service\{DocumentService, PaginationService};
+use App\Service\DocumentService;
 
 use App\Data\{DocumentData, DocumentItem};
 
@@ -34,7 +34,7 @@ class DocumentServiceTest extends TestCase
         //$userRepository = $this->createMock(UserRepository::class);
         //$documentRepository = $this->createMock(DocumentRepository::class);
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $result = $documentService->createDocument(new DocumentData(['document_payload' => $document_payload]), $user);
 
@@ -68,7 +68,7 @@ class DocumentServiceTest extends TestCase
 
 
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
 
         $documentItem = $documentService->patchDocument(new DocumentData(['document_payload' => $patch_payload]), $user);
@@ -93,7 +93,7 @@ class DocumentServiceTest extends TestCase
                                 ->method('getDocumentByKey')
                                 ->willReturn(null);
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->patchDocument(new DocumentData(['document_payload' => $patch_payload]), $user);
 
@@ -123,7 +123,7 @@ class DocumentServiceTest extends TestCase
                     ->setModifyAt(time())
                 );
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->patchDocument(new DocumentData(['document_payload' => $patch_payload]), $user);
 
@@ -150,7 +150,7 @@ class DocumentServiceTest extends TestCase
                 ->setModifyAt(time())
             );
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->patchDocument(new DocumentData(['document_payload' => $patch_payload]), $user);
 
@@ -175,7 +175,7 @@ class DocumentServiceTest extends TestCase
                                 ->willReturn($document);
 
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentItem = $documentService->publishDocument(new DocumentData(['document_key' => $document_key]), $user);
 
@@ -196,7 +196,7 @@ class DocumentServiceTest extends TestCase
                                 ->method('getDocumentByKey')
                                 ->willReturn(null);
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->publishDocument(new DocumentData(['document_key' => $document_key]), $user);
 
@@ -222,7 +222,7 @@ class DocumentServiceTest extends TestCase
                                         ->setModifyAt(time() + 3800)
                                 );
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->publishDocument(new DocumentData(['document_key' => $document_key]), $user);
 
@@ -250,12 +250,88 @@ class DocumentServiceTest extends TestCase
                                         ->setModifyAt(time() + 3800)
                                 );
 
-        $documentService = new DocumentService($this->documentRepository, $this->userRepository, new PaginationService());
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
 
         $documentService->publishDocument(new DocumentData(['document_key' => $document_key]), $user);
 
     }
 
+
+
+    public function testDeleteDocument():void
+    {
+        $user = (new User())->setLogin('John')->setPassword('111');
+        $document_key = 'some_key';
+
+        $document = (new Document())
+                    ->setUserRel($user)
+                    ->setDocumentKey($document_key)
+                    ->setDocumentStatus('draft')
+                    ->setDocumentPayload('{"some": "111"}')
+                    ->setCreateAt(time())
+                    ->setModifyAt(time());
+
+
+        $this->documentRepository->expects($this->once())
+                                ->method('getDocumentByKey')
+                                ->willReturn($document);
+
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
+
+        $documentItem = $documentService->deleteDocument(new DocumentData(['document_key' => $document_key]), $user);
+
+        $this->assertTrue($documentItem instanceof DocumentItem);
+
+    }
+
+
+    public function testDeleteDocumentNotFound():void
+    {
+        $this->expectException(DocumentNotFoundException::class);
+        $this->expectExceptionMessage("Документ не найден");
+
+        $user = (new User())->setLogin('John')->setPassword('111');
+        $document_key = 'some_key';
+
+        $this->documentRepository->expects($this->once())
+                                ->method('getDocumentByKey')
+                                ->willReturn(null);
+
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
+
+        $documentService->deleteDocument(new DocumentData(['document_key' => $document_key]), $user);
+
+    }
+
+
+    public function testDeleteDocumentAccessDenied():void
+    {
+        $this->expectException(DocumentAccessDeniedException::class);
+        $this->expectExceptionMessage("у вас нет прав доступа к этому документу");
+
+        $document_key = 'some_key';
+
+        $currentUser = (new User())->setLogin('John')->setPassword('111');
+        $documentOwner = (new User())->setLogin('Marcus')->setPassword('222');
+        $document = (new Document())
+                            ->setUserRel($documentOwner)
+                            ->setDocumentKey($document_key)
+                            ->setDocumentStatus('draft')
+                            ->setDocumentPayload('{"some": "111"}')
+                            ->setCreateAt(time())
+                            ->setModifyAt(time());
+
+
+        $this->documentRepository->expects($this->once())
+                                ->method('getDocumentByKey')
+                                ->willReturn($document);
+
+        $documentService = new DocumentService($this->documentRepository, $this->userRepository);
+
+        $documentService->deleteDocument(new DocumentData(['document_key' => $document_key]), $currentUser);
+
+
+    }
 
 
 }

@@ -16,11 +16,10 @@ class DocumentService
 	private PaginationService $paginationService;
 
 
-	public function __construct(DocumentRepository $documentRepository, UserRepository $userRepository, PaginationService $paginationService)
+	public function __construct(DocumentRepository $documentRepository, UserRepository $userRepository)
 	{
 		$this->documentRepository = $documentRepository;
 		$this->userRepository = $userRepository;
-		$this->paginationService = $paginationService;
 
 	}
 
@@ -127,32 +126,26 @@ class DocumentService
 	}
 
 
-
-	public function getDocuments(int $page):DocumentItemList
+	public function deleteDocument(DocumentData $documentData, User $currentUser):DocumentItem
 	{
-		$this->paginationService->setCurrentPage($page)->setRowsCount(5);
+		$document_key = $documentData->getDocumentKey();
 
-		$documents_count = $this->paginationService->getRowsCount();;
-		$offset = $this->paginationService->getOffset();
+		$document = $this->documentRepository->getDocumentByKey($document_key);
 
-		$documents = $this->documentRepository->getPublishedDocuments($offset, $documents_count);
+		if (!$document)
+		{
+			throw new DocumentNotFoundException("Документ не найден");
 
-		return new DocumentItemList(
-			array_map(function (Document $document):DocumentItem
-				{
-					$createAt = date("Y-m-d H:i:s", $document->getCreateAt());
-					$modifyAt = date("Y-m-d H:i:s", $document->getModifyAt());
+		}
 
-					return (new DocumentItem())
-							->setDocumentKey($document->getDocumentKey())
-							->setDocumentStatus($document->getDocumentStatus())
-							->setDocumentPayload($document->getDocumentPayload())
-							->setCreateAt($createAt)
-							->setModifyAt($modifyAt);
-				}, $documents)
+		if ($document->getUserRel() !== $currentUser)
+		{
+			throw new DocumentAccessDeniedException("у вас нет прав доступа к этому документу");
+		}
 
-		);
+		$this->documentRepository->remove($document, true);
 
+		return $this->getDocumentItem($document);
 
 	}
 

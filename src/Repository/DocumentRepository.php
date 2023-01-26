@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Document;
+use App\Entity\{Document, User};
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -56,6 +56,33 @@ class DocumentRepository extends ServiceEntityRepository
                 ->getResult();
     }
 
+
+    public function getUserDocuments(int $offset, int $documents_count, User $user):array
+    {
+        return $this->createQueryBuilder('d')
+                ->setFirstResult($offset)
+                ->setMaxResults($documents_count)
+                ->andWhere("d.user_rel = :user")
+                ->setParameter("user", $user)
+                ->getQuery()
+                ->getResult();
+    }   
+
+
+    public function getUserDocumentsByStatus(int $offset, int $documents_count, User $user, string $document_status):array
+    {
+        return $this->createQueryBuilder('d')
+                ->setFirstResult($offset)
+                ->setMaxResults($documents_count)
+                ->andWhere("d.user_rel = :user")
+                ->andWhere("d.document_status = :document_status")
+                ->setParameter("user", $user)
+                ->setParameter("document_status", $document_status)
+                ->getQuery()
+                ->getResult();
+    }
+
+    
 
 
 
