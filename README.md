@@ -15,7 +15,7 @@
 
 3) http://servername/api/documents/all
 
-# 1) Регистрация
+## 1) Регистрация
 url: http://servername/api/registration
 
 Метод: POST
